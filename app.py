@@ -42,7 +42,7 @@ def EMA(trend,sdate,slot,before):
     date_picker = []
     for i in range(before):
         start = sdate + timedelta(i)
-        print(str(start))
+        # print(str(start))
         date_picker.append(str(start))
         # First Round Of EMA = Calculate SMA
         if i == 0:
