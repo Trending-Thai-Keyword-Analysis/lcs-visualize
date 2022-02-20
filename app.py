@@ -4,12 +4,10 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from stqdm import stqdm
-
-if 'ndate' not in st.session_state:
-    st.session_state.ndate = date(2021,11,12)
+import os
 
 @st.cache(suppress_st_warning=True)
-def SMA(trend,mv,ndate,slot,before):
+def SMA(trend,ndate,slot,before):
     mv = []
     date_picker = []
     for i in range(before):
@@ -19,7 +17,7 @@ def SMA(trend,mv,ndate,slot,before):
         for j in range(slot):
             temp_date = start - timedelta(j)
             temp_date = '_'.join(str(temp_date).split('-'))
-            temp_trend = pd.read_csv('./assets/lcs_result/'+str(temp_date)+'.csv')
+            temp_trend = pd.read_json('./assets/lcs_result/'+str(temp_date)+'.json',encoding='utf8')
             temp_trend = temp_trend[temp_trend['LCS'] == trend]
             temp_trend.drop('total_match',axis='columns',inplace = True)
 
@@ -35,23 +33,30 @@ def SMA(trend,mv,ndate,slot,before):
         
         avg = data['match'].sum()/slot
         mv.append(avg)
-        # print(mv)
     return date_picker,mv
-        
+
+@st.cache(suppress_st_warning=True)
+def search_suggestion():
+    all = os.listdir('./assets/lcs_result')
+    ls = []
+    for i in all:
+        df = pd.read_json('./assets/lcs_result/'+i,encoding='utf8')
+        ls.extend(df['LCS'])
+    return list(set(ls))
 
 st.set_page_config(layout='wide')
 st.title('Thai Trending Phrase Analysis on Temporal News Dataset')
+sg = search_suggestion()
 c1,c2 = st.columns((1,3))
 ############################################
 
 with c1:
     st.subheader('Trending Date')
     with st.form('Trending Form'):
-        st.session_state.ndate = st.date_input(label='Select Date',min_value= date(2021,9,1),max_value= date(2021,12,31),value=date(2021,11,12))
+        st.session_state.ndate = st.date_input(label='Select Date',min_value= date(2021,10,1),max_value= date(2021,12,31),value=date(2021,10,1))
         submitted1 = st.form_submit_button('Submit')
     news = '_'.join(str(st.session_state.ndate).split('-'))
-    # print(news)
-    df = pd.read_csv('./assets/lcs_result/'+news+'.csv')
+    df = pd.read_json('./assets/lcs_result/'+news+'.json',encoding='utf8')
     st.subheader('Trending Result')
     st.dataframe(df[['LCS','match']])
 ############################################
@@ -59,17 +64,17 @@ with c1:
 with c2:
     st.subheader('Moving Average')
     with st.form('Moving Average'):
-        st.session_state.trend = st.selectbox('Word',df['LCS'])
-        st.session_state.mv = st.selectbox('Type of Moving Average', ['Simple Moving Average','Exponential Moving Average'])
-        st.session_state.slot = st.number_input('Window Slot (1day/slot)', min_value=1, max_value=144,value=2,step=1)
-        st.session_state.before = st.number_input('Day Before', min_value=2, max_value=144,value=2,step=1)
+        st.session_state.trend = st.text_input('Word','ทิดไพรวัลย์')
         submitted2 = st.form_submit_button('Submit')
     try:
-        date_all,mv = SMA(st.session_state.trend,st.session_state.mv,st.session_state.ndate,int(st.session_state.slot),int(st.session_state.before))
+        before =date(2021,12,31) - date(2021,10,4)
+        before = int(before.total_seconds()/(60*60*24))
+        date_all,mv = SMA(st.session_state.trend,date(2021,12,31),5,before)
         result = pd.DataFrame({
             'date':date_all,
             'simple_moving_average':mv
         })
+        st.subheader('Moving Average Graph')
         st.line_chart(result.rename(columns={'date':'index'}).set_index('index'))
     except FileNotFoundError:
         st.error("ขอบเขตของช่วงเวลาที่ใช้ในการคำนวณเกิน กรุณาปรับ Window Slot หรือ Day Before")
