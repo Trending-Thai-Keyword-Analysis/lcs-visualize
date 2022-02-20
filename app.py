@@ -17,7 +17,7 @@ def SMA(trend,ndate,slot,before):
         for j in range(slot):
             temp_date = start - timedelta(j)
             temp_date = '_'.join(str(temp_date).split('-'))
-            temp_trend = pd.read_json('./assets/lcs_result/'+str(temp_date)+'.json',encoding='utf8')
+            temp_trend = pd.read_json('./assets/lcs_result/'+str(temp_date)+'.json',encoding="utf8")
             temp_trend = temp_trend[temp_trend['LCS'] == trend]
             temp_trend.drop('total_match',axis='columns',inplace = True)
 
@@ -56,7 +56,8 @@ with c1:
         st.session_state.ndate = st.date_input(label='Select Date',min_value= date(2021,10,1),max_value= date(2021,12,31),value=date(2021,10,1))
         submitted1 = st.form_submit_button('Submit')
     news = '_'.join(str(st.session_state.ndate).split('-'))
-    df = pd.read_json('./assets/lcs_result/'+news+'.json',encoding='utf8')
+    # print(news)
+    df = pd.read_json('./assets/lcs_result/'+news+'.json',encoding="utf8")
     st.subheader('Trending Result')
     st.dataframe(df[['LCS','match']])
 ############################################
