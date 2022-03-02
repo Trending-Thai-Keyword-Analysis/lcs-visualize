@@ -24,13 +24,11 @@ def SMA(trend,slot,before):
             temp_trend.drop('total_match',axis='columns',inplace = True)
 
             if len(temp_trend) != 0:
-                temp_trend['timeslot'] = [int(j)]
                 data = pd.concat([data,temp_trend],ignore_index=True)
             else:
                 null = pd.DataFrame([])
                 null['LCS'] = [trend]
                 null['match'] = [0]
-                null['timeslot'] = [int(j)]
                 data = pd.concat([data,null],ignore_index=True)
         
         avg = data['match'].sum()/slot
@@ -54,13 +52,11 @@ def EMA(trend,slot,before):
                 temp_trend.drop('total_match',axis='columns',inplace = True)
 
                 if len(temp_trend) != 0:
-                    temp_trend['timeslot'] = [int(j)]
                     data = pd.concat([data,temp_trend],ignore_index=True)
                 else:
                     null = pd.DataFrame([])
                     null['LCS'] = [trend]
                     null['match'] = [0]
-                    null['timeslot'] = [int(j)]
                     data = pd.concat([data,null],ignore_index=True)
             
             avg = data['match'].sum()/slot
@@ -149,7 +145,6 @@ with c1:
     # gb.configure_grid_options(domLayout='normal')
     gridOptions = gb.build()
 
-
     grid_response = AgGrid(
         df , 
         gridOptions=gridOptions, 
@@ -159,6 +154,7 @@ with c1:
         fit_columns_on_grid_load=True, 
         allow_unsafe_jscode=True
         )
+
     df = grid_response["data"]
     selected = grid_response['selected_rows']
     selected_df = pd.DataFrame(selected)
