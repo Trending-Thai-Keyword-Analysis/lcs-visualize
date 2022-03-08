@@ -31,6 +31,14 @@ def EMA(trend,slot):
                 freq_list.append(temp_trend.iloc[0]["frequency"])
             else:
                 freq_list.append(0)
+        elif i == slot-1:
+            if len(temp_trend) !=0 :
+                freq_list.append(temp_trend.iloc[0]["frequency"])
+                mv.append(temp_trend.iloc[0]["EMA"])
+            else:
+                freq_list.append(0)
+                avg = sum(freq_list)/slot
+                mv.append(avg)
         else:
             if len(temp_trend) != 0:
                 freq_list.append(temp_trend.iloc[0]["frequency"])
@@ -100,14 +108,18 @@ with c1:
     if st.session_state.mv == "Simple Moving Average":
         if st.session_state.dif == "Minus":
             df = pd.read_json('./assets/SMA/MINUS/'+news+'.json',encoding="utf8")
+            df.sort_values(['dif','frequency'], ascending=False, inplace=True, ignore_index=True)
         elif st.session_state.dif == "Divide":
             df = pd.read_json('./assets/SMA/DIVIDE/'+news+'.json',encoding="utf8")
+            df.sort_values(['dif','frequency'], ascending=False, inplace=True, ignore_index=True)
         gb = GridOptionsBuilder.from_dataframe(df[['LCS','frequency','SMA', 'dif']])
     elif st.session_state.mv == "Exponential Moving Average":
         if st.session_state.dif == "Minus":
             df = pd.read_json('./assets/EMA/MINUS/'+news+'.json',encoding="utf8")
+            df.sort_values(['dif','frequency'], ascending=False, inplace=True, ignore_index=True)
         elif st.session_state.dif == "Divide":
             df = pd.read_json('./assets/EMA/DIVIDE/'+news+'.json',encoding="utf8")
+            df.sort_values(['dif','frequency'], ascending=False, inplace=True, ignore_index=True)
         gb = GridOptionsBuilder.from_dataframe(df[['LCS','frequency','EMA', 'dif']])
 
     
