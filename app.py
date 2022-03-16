@@ -21,7 +21,7 @@ def EMA(trend,slot):
         start = sdate + timedelta(i)
         date_picker.append(str(start))
         temp_date = '_'.join(str(start).split('-'))
-        temp_trend = pd.read_json('./assets/EMA/Minus/'+str(temp_date)+'.json',encoding="utf8")
+        temp_trend = pd.read_json('./assets/EMA/'+str(temp_date)+'.json',encoding="utf8")
         temp_trend = temp_trend[temp_trend['LCS'] == trend]
         temp_trend.drop('total_match',axis='columns',inplace = True)
 
@@ -31,6 +31,14 @@ def EMA(trend,slot):
                 freq_list.append(temp_trend.iloc[0]["frequency"])
             else:
                 freq_list.append(0)
+        elif i == slot-1:
+            if len(temp_trend) !=0 :
+                freq_list.append(temp_trend.iloc[0]["frequency"])
+                mv.append(temp_trend.iloc[0]["EMA"])
+            else:
+                freq_list.append(0)
+                avg = sum(freq_list)/slot
+                mv.append(avg)
         else:
             if len(temp_trend) != 0:
                 freq_list.append(temp_trend.iloc[0]["frequency"])
@@ -55,7 +63,7 @@ def SMA(trend,slot):
         start = sdate + timedelta(i)
         date_picker.append(str(start))
         temp_date = '_'.join(str(start).split('-'))
-        temp_trend = pd.read_json('./assets/SMA/Minus/'+str(temp_date)+'.json',encoding="utf8")
+        temp_trend = pd.read_json('./assets/SMA/'+str(temp_date)+'.json',encoding="utf8")
         temp_trend = temp_trend[temp_trend['LCS'] == trend]
         temp_trend.drop('total_match',axis='columns',inplace = True)
 
@@ -84,9 +92,6 @@ st.title('Thai Trending Phrase Analysis on Temporal News Dataset')
 if 'mv' not in st.session_state:
     st.session_state.mv = "Simple Moving Average"
 
-if 'dif' not in st.session_state:
-    st.session_state.dif = "Minus"
-
 c1,c2 = st.columns((3,7))
 ############################################
 
@@ -98,17 +103,13 @@ with c1:
     news = '_'.join(str(st.session_state.ndate).split('-'))
     # print(news)
     if st.session_state.mv == "Simple Moving Average":
-        if st.session_state.dif == "Minus":
-            df = pd.read_json('./assets/SMA/MINUS/'+news+'.json',encoding="utf8")
-        elif st.session_state.dif == "Divide":
-            df = pd.read_json('./assets/SMA/DIVIDE/'+news+'.json',encoding="utf8")
-        gb = GridOptionsBuilder.from_dataframe(df[['LCS','frequency','SMA', 'dif']])
+        df = pd.read_json('./assets/SMA/'+news+'.json',encoding="utf8")
+        df = df.loc[df['frequency'] > df['SMA']]
+        gb = GridOptionsBuilder.from_dataframe(df[['LCS','frequency','SMA']])
     elif st.session_state.mv == "Exponential Moving Average":
-        if st.session_state.dif == "Minus":
-            df = pd.read_json('./assets/EMA/MINUS/'+news+'.json',encoding="utf8")
-        elif st.session_state.dif == "Divide":
-            df = pd.read_json('./assets/EMA/DIVIDE/'+news+'.json',encoding="utf8")
-        gb = GridOptionsBuilder.from_dataframe(df[['LCS','frequency','EMA', 'dif']])
+        df = pd.read_json('./assets/EMA/'+news+'.json',encoding="utf8")
+        df = df.loc[df['frequency'] > df['EMA']]
+        gb = GridOptionsBuilder.from_dataframe(df[['LCS','frequency','EMA']])
 
     
     st.subheader('Trending Result')
@@ -150,9 +151,6 @@ with c1:
 with c2:
     st.subheader('Moving Average')
     st.selectbox('Moving Average', ('Simple Moving Average', 'Exponential Moving Average'), key="mv", index=0)
-    st.write('<style>div.row-widget.stRadio > div{flex-direction:row;}</style>', unsafe_allow_html=True)
-    st.write('<style>div.row-widget.stRadio{margin-top: -2rem;justify-content: center;}</style>', unsafe_allow_html=True)
-    st.radio("Difference", ('Minus', 'Divide'), key="dif", index=0)
     st.markdown(f'<p style="font-size:25px;text-align: center;margin-bottom: -1rem"> {trend} </p>', unsafe_allow_html=True)
     try:
 
