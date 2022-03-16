@@ -92,9 +92,6 @@ st.title('Thai Trending Phrase Analysis on Temporal News Dataset')
 if 'mv' not in st.session_state:
     st.session_state.mv = "Simple Moving Average"
 
-# if 'dif' not in st.session_state:
-#     st.session_state.dif = "Minus"
-
 c1,c2 = st.columns((3,7))
 ############################################
 
@@ -106,20 +103,12 @@ with c1:
     news = '_'.join(str(st.session_state.ndate).split('-'))
     # print(news)
     if st.session_state.mv == "Simple Moving Average":
-        # if st.session_state.dif == "Minus":
         df = pd.read_json('./assets/SMA/'+news+'.json',encoding="utf8")
-            # df.sort_values(['dif','frequency'], ascending=False, inplace=True, ignore_index=True)
-        # elif st.session_state.dif == "Divide":
-        #     df = pd.read_json('./assets/SMA/DIVIDE/'+news+'.json',encoding="utf8")
-        #     df.sort_values(['dif','frequency'], ascending=False, inplace=True, ignore_index=True)
+        df = df.loc[df['frequency'] > df['SMA']]
         gb = GridOptionsBuilder.from_dataframe(df[['LCS','frequency','SMA']])
     elif st.session_state.mv == "Exponential Moving Average":
-        # if st.session_state.dif == "Minus":
         df = pd.read_json('./assets/EMA/'+news+'.json',encoding="utf8")
-            # df.sort_values(['dif','frequency'], ascending=False, inplace=True, ignore_index=True)
-        # elif st.session_state.dif == "Divide":
-        #     df = pd.read_json('./assets/EMA/DIVIDE/'+news+'.json',encoding="utf8")
-        #     df.sort_values(['dif','frequency'], ascending=False, inplace=True, ignore_index=True)
+        df = df.loc[df['frequency'] > df['EMA']]
         gb = GridOptionsBuilder.from_dataframe(df[['LCS','frequency','EMA']])
 
     
@@ -162,9 +151,6 @@ with c1:
 with c2:
     st.subheader('Moving Average')
     st.selectbox('Moving Average', ('Simple Moving Average', 'Exponential Moving Average'), key="mv", index=0)
-    # st.write('<style>div.row-widget.stRadio > div{flex-direction:row;}</style>', unsafe_allow_html=True)
-    # st.write('<style>div.row-widget.stRadio{margin-top: -2rem;justify-content: center;}</style>', unsafe_allow_html=True)
-    # st.radio("Difference", ('Minus', 'Divide'), key="dif", index=0)
     st.markdown(f'<p style="font-size:25px;text-align: center;margin-bottom: -1rem"> {trend} </p>', unsafe_allow_html=True)
     try:
 
