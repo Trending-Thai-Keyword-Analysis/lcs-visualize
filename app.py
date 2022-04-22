@@ -104,11 +104,11 @@ with c1:
     # print(news)
     if st.session_state.mv == "Simple Moving Average":
         df = pd.read_json('./assets/SMA/'+news+'.json',encoding="utf8")
-        # df = df.loc[df['frequency'] > df['SMA']]
+        df = df.loc[df['frequency'] > df['SMA']]
         gb = GridOptionsBuilder.from_dataframe(df[['LCS','frequency','SMA']])
     elif st.session_state.mv == "Exponential Moving Average":
         df = pd.read_json('./assets/EMA/'+news+'.json',encoding="utf8")
-        # df = df.loc[df['frequency'] > df['EMA']]
+        df = df.loc[df['frequency'] > df['EMA']]
         gb = GridOptionsBuilder.from_dataframe(df[['LCS','frequency','EMA']])
 
     
